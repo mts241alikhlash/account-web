@@ -1,5 +1,11 @@
 # account-web
 
+## 1.1.0
+
+### Minor Changes
+
+- 6a3c205: Icons come from `@lucide/vue` (replacing the deprecated `lucide-vue-next`), with `@mts241alikhlash/ui` and `web-shared` 1.1.0.
+
 ## 1.0.1
 
 ### Patch Changes
