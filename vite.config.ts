@@ -57,6 +57,9 @@ const unroutedProxy: ProxyTable = Object.fromEntries(
 )
 
 export default defineConfig(({ mode }) => ({
+  optimizeDeps: {
+    include: ['@unovis/ts > striptags'],
+  },
   server: {
     port: 5180,
     proxy: { ...serviceProxy, ...healthProxy, ...unroutedProxy },
