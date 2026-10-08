@@ -1,5 +1,15 @@
 # account-web
 
+## 1.2.0
+
+### Minor Changes
+
+- ae55564: The profile address editor now selects official administrative regions and saves their codes.
+
+### Patch Changes
+
+- 1aebec8: The Vite dev server pre-bundles the Unovis `striptags` dependency so pages with charts load in the browser. Development only.
+
 ## 1.1.0
 
 ### Minor Changes
