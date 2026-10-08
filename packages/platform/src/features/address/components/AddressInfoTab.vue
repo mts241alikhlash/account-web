@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
+import { computed, reactive, ref, watch, useId } from 'vue'
 import { Input } from '@mts241alikhlash/ui/input'
+import { FloatingLabelField } from '@mts241alikhlash/ui/form'
 import { Button } from '@mts241alikhlash/ui/button'
 import { Loader2 } from '@lucide/vue'
+import RegionSelect from './RegionSelect.vue'
 import { useAddress } from '../composables/useAddress'
 import type { AddressData, AddressRecord, AddressSavePayload } from '../types'
+import type { RegionCodes, RegionNames } from '../types'
 
 const props = defineProps<{
   data: AddressData
@@ -17,6 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const { isSaving } = useAddress()
+const fieldId = useId()
 
 const form = reactive({
   street: '',
@@ -26,6 +30,10 @@ const form = reactive({
   district: '',
   city: '',
   province: '',
+  provinceCode: '',
+  regencyCode: '',
+  districtCode: '',
+  villageCode: '',
   country: 'Indonesia',
   postalCode: '',
 })
@@ -42,6 +50,10 @@ watch(
       form.district = addr.district ?? ''
       form.city = addr.city ?? ''
       form.province = addr.province ?? ''
+      form.provinceCode = addr.provinceCode ?? ''
+      form.regencyCode = addr.regencyCode ?? ''
+      form.districtCode = addr.districtCode ?? ''
+      form.villageCode = addr.villageCode ?? ''
       form.country = addr.country ?? 'Indonesia'
       form.postalCode = addr.postalCode ?? ''
     }
@@ -49,8 +61,36 @@ watch(
   { immediate: true },
 )
 
+const regionError = ref('')
+const REGION_KEYS = [
+  'provinceCode',
+  'regencyCode',
+  'districtCode',
+  'villageCode',
+] as const
+const regionCodes = computed<RegionCodes>(() => ({
+  provinceCode: form.provinceCode,
+  regencyCode: form.regencyCode,
+  districtCode: form.districtCode,
+  villageCode: form.villageCode,
+}))
+
+function setRegionCodes(codes: RegionCodes) {
+  Object.assign(form, codes)
+  regionError.value = ''
+}
+
+function setRegionNames(names: RegionNames) {
+  Object.assign(form, names)
+}
+
 function handleSubmit() {
   if (!props.isEditable) return
+  if (!REGION_KEYS.every((key) => form[key])) {
+    regionError.value =
+      'Pilih provinsi, kabupaten/kota, kecamatan, dan desa/kelurahan'
+    return
+  }
   emit('save', {
     street: form.street,
     rt: form.rt === '' ? null : form.rt,
@@ -59,6 +99,10 @@ function handleSubmit() {
     district: form.district,
     city: form.city,
     province: form.province,
+    provinceCode: form.provinceCode,
+    regencyCode: form.regencyCode,
+    districtCode: form.districtCode,
+    villageCode: form.villageCode,
     country: form.country,
     postalCode: form.postalCode === '' ? null : form.postalCode,
   })
@@ -72,138 +116,146 @@ function handleSubmit() {
       @submit.prevent="handleSubmit"
     >
       <div class="grid gap-5 md:grid-cols-2">
-        <div class="space-y-1.5 md:col-span-2">
-          <label class="text-xs font-semibold text-foreground">
-            Jalan / Dusun
-            <span
-              v-if="isEditable"
-              class="text-destructive"
-              >*</span
-            >
-          </label>
+        <FloatingLabelField
+          label="Jalan / Dusun"
+          :for="`${fieldId}-street`"
+          :required="isEditable"
+          :floating="!isEditable || !!form.street"
+          class="md:col-span-2"
+        >
           <Input
+            :id="`${fieldId}-street`"
             v-model="form.street"
-            placeholder="Nama Jalan, Gedung, No. Rumah"
             :disabled="!isEditable"
             class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
             required
           />
-        </div>
+        </FloatingLabelField>
 
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-foreground">RT</label>
+        <FloatingLabelField
+          label="RT"
+          :for="`${fieldId}-rt`"
+          :floating="!isEditable || !!form.rt"
+        >
           <Input
+            :id="`${fieldId}-rt`"
             v-model="form.rt"
-            placeholder="RT"
             maxlength="5"
             :disabled="!isEditable"
             class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
           />
-        </div>
+        </FloatingLabelField>
 
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-foreground">RW</label>
+        <FloatingLabelField
+          label="RW"
+          :for="`${fieldId}-rw`"
+          :floating="!isEditable || !!form.rw"
+        >
           <Input
+            :id="`${fieldId}-rw`"
             v-model="form.rw"
-            placeholder="RW"
             maxlength="5"
             :disabled="!isEditable"
             class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
           />
-        </div>
+        </FloatingLabelField>
 
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-foreground">
-            Desa / Kelurahan
-            <span
-              v-if="isEditable"
-              class="text-destructive"
-              >*</span
+        <template v-if="isEditable">
+          <div class="space-y-2 md:col-span-2">
+            <RegionSelect
+              :model-value="regionCodes"
+              @update:model-value="setRegionCodes"
+              @update:names="setRegionNames"
+            />
+            <p
+              v-if="regionError"
+              role="alert"
+              class="text-sm text-destructive"
             >
-          </label>
-          <Input
-            v-model="form.village"
-            placeholder="Nama Desa atau Kelurahan"
-            :disabled="!isEditable"
-            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-            required
-          />
-        </div>
+              {{ regionError }}
+            </p>
+          </div>
+        </template>
+        <template v-else>
+          <FloatingLabelField
+            label="Desa / Kelurahan"
+            :for="`${fieldId}-village`"
+            floating
+          >
+            <Input
+              :id="`${fieldId}-village`"
+              v-model="form.village"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </FloatingLabelField>
 
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-foreground">
-            Kecamatan
-            <span
-              v-if="isEditable"
-              class="text-destructive"
-              >*</span
-            >
-          </label>
-          <Input
-            v-model="form.district"
-            placeholder="Nama Kecamatan"
-            :disabled="!isEditable"
-            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-            required
-          />
-        </div>
+          <FloatingLabelField
+            label="Kecamatan"
+            :for="`${fieldId}-district`"
+            floating
+          >
+            <Input
+              :id="`${fieldId}-district`"
+              v-model="form.district"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </FloatingLabelField>
 
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-foreground">
-            Kabupaten / Kota
-            <span
-              v-if="isEditable"
-              class="text-destructive"
-              >*</span
-            >
-          </label>
-          <Input
-            v-model="form.city"
-            placeholder="Nama Kabupaten atau Kota"
-            :disabled="!isEditable"
-            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-            required
-          />
-        </div>
+          <FloatingLabelField
+            label="Kabupaten / Kota"
+            :for="`${fieldId}-city`"
+            floating
+          >
+            <Input
+              :id="`${fieldId}-city`"
+              v-model="form.city"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </FloatingLabelField>
 
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-foreground">
-            Provinsi
-            <span
-              v-if="isEditable"
-              class="text-destructive"
-              >*</span
-            >
-          </label>
-          <Input
-            v-model="form.province"
-            placeholder="Nama Provinsi"
-            :disabled="!isEditable"
-            class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
-            required
-          />
-        </div>
+          <FloatingLabelField
+            label="Provinsi"
+            :for="`${fieldId}-province`"
+            floating
+          >
+            <Input
+              :id="`${fieldId}-province`"
+              v-model="form.province"
+              disabled
+              class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
+            />
+          </FloatingLabelField>
+        </template>
 
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-foreground">Negara</label>
+        <FloatingLabelField
+          label="Negara"
+          :for="`${fieldId}-country`"
+          floating
+        >
           <Input
+            :id="`${fieldId}-country`"
             v-model="form.country"
-            placeholder="Negara"
             disabled
             class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
           />
-        </div>
+        </FloatingLabelField>
 
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-foreground">Kode Pos</label>
+        <FloatingLabelField
+          label="Kode Pos"
+          :for="`${fieldId}-postal-code`"
+          :floating="!isEditable || !!form.postalCode"
+        >
           <Input
+            :id="`${fieldId}-postal-code`"
             v-model="form.postalCode"
-            placeholder="Kode Pos"
             maxlength="10"
             :disabled="!isEditable"
             class="disabled:opacity-100 disabled:bg-muted/20 disabled:cursor-default disabled:text-foreground disabled:border-border/80"
           />
-        </div>
+        </FloatingLabelField>
       </div>
 
       <div
