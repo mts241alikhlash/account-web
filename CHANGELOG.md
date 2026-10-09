@@ -1,5 +1,11 @@
 # account-web
 
+## 1.2.1
+
+### Patch Changes
+
+- cf311ca: The profile identity tab uses floating-label fields like the other apps.
+
 ## 1.2.0
 
 ### Minor Changes
