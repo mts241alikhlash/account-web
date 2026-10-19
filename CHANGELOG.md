@@ -1,5 +1,11 @@
 # account-web
 
+## 1.2.3
+
+### Patch Changes
+
+- e8e48aa: Ejaan Amerika di kode, komentar, dan nama test (`honours` menjadi `honors`, `enrolment` menjadi `enrollment`, dan sejenisnya).
+
 ## 1.2.2
 
 ### Patch Changes
