@@ -1,5 +1,11 @@
 # account-web
 
+## 1.2.2
+
+### Patch Changes
+
+- a9da878: Field profil, alamat, dan ubah password memakai `FloatingField`; header card memakai standar `@mts241alikhlash/ui` 1.8.
+
 ## 1.2.1
 
 ### Patch Changes
