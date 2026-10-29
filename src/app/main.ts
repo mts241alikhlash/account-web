@@ -14,7 +14,9 @@ configureAuth({
   appTitle: '241 Akun',
   appSubtitle: 'Akun sekolah',
   logoAlt: 'Logo 241',
-  loginTitle: 'Masuk ke 241 Apps',
+  loginTitle: 'Masuk ke 241 Akun',
+  loginSubtitle: 'Satu akun untuk semua aplikasi madrasah.',
+  identifierLabel: 'Nama pengguna',
   homeRoute: '/',
   ssoApp: 'account',
 })

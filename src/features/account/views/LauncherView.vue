@@ -29,7 +29,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-3xl space-y-6 p-6">
+  <div class="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
     <p
       v-if="denied"
       class="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm"
@@ -46,7 +46,7 @@ onMounted(async () => {
         v-for="app in apps"
         :key="app.key"
         :href="app.url"
-        class="rounded-xl border bg-card p-6 font-semibold shadow-sm transition hover:shadow-md"
+        class="rounded-md border bg-card p-6 font-semibold transition hover:border-primary/40"
       >
         {{ app.label }}
       </a>
