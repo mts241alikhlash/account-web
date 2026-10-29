@@ -35,7 +35,7 @@ async function submit() {
 <template>
   <div class="flex min-h-svh items-center justify-center bg-muted/50 p-6">
     <form
-      class="w-full max-w-sm space-y-4 rounded-xl border bg-card p-8 shadow-lg"
+      class="w-full max-w-sm space-y-4 rounded-md border bg-card p-8"
       @submit.prevent="submit"
     >
       <h1 class="text-xl font-bold tracking-tight">Masuk ke 241 Apps</h1>
